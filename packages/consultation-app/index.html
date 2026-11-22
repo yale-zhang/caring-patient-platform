@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
     <meta base ="/wx/">
     <title></title>
+      <!-- websdk / emedia 官方 npm 包已下架（CDN 404），用空壳占位避免整个 bundle 抛 ReferenceError -->
+    <script>
+      (function () {
+        function noop() {}
+        function makeConn() {
+          return {
+            getUniqueId: function () { return Date.now() + '' },
+            listen: noop, open: noop, close: noop, send: noop,
+            sendPrivateMessage: noop, sendGroupMessage: noop,
+            setPresence: noop, subscribe: noop, getRoster: noop,
+            isOpened: function () { return false }
+          }
+        }
+        if (typeof websdk === 'undefined') {
+          window.websdk = { default: { connection: makeConn, message: function () { return { set: noop, body: {} } } } }
+        }
+        if (typeof emedia === 'undefined') { window.emedia = {} }
+        if (typeof window.EMedia === 'undefined') { window.EMedia = {} }
+      })()
+    </script>
   </head>
   <body>
     <div id="app-box" style="background-color: #fafafa;"> </div>
