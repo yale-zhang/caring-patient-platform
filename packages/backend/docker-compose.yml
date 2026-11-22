@@ -103,6 +103,9 @@ services:
     image: nginx:1.21
     platform: linux/amd64
     container_name: caring-nginx
+    restart: always
+    depends_on:
+      - caring-gateway-server
     volumes:
       - ./config/nginx/conf:/etc/nginx
       - ./config/nginx/html:/usr/share/nginx/html
@@ -128,7 +131,16 @@ services:
       CARING_MYSQL_PORT: "3306"
       CARING_REDIS_IP: redis
       CARING_REDIS_PORT: "6379"
+      # Nacos 已开启鉴权(nacos.core.auth.enabled=true)，客户端必须带账号
+      NACOS_USERNAME: ${NACOS_USERNAME:-nacos}
+      NACOS_PASSWORD: ${NACOS_PASSWORD:-nacos}
+      # 命名空间/分组：默认值取自 src/main/filters/config-dev.properties
+      # 若 Nacos 里配置实际不在该 namespace，用环境变量 NACOS_NAMESPACE 覆盖即可，无需重新打包
+      NACOS_ID: ${NACOS_NAMESPACE:-c5bec804-e4c4-11f1-a4ec-0242ac150002}
+      NACOS_GROUP: ${NACOS_GROUP:-sass-cloud}
+      NACOS_DISCOVERYGROUP: ${NACOS_DISCOVERYGROUP:-sass-cloud}
       PARAMS: >-
+        --spring.main.web-application-type=reactive
         --caring.nacos.ip=nacos --caring.nacos.port=8848
         --caring.mysql.ip=mysql --caring.mysql.port=3306
         --caring.redis.ip=redis --caring.redis.port=6379
@@ -159,6 +171,14 @@ services:
       CARING_MYSQL_PORT: "3306"
       CARING_REDIS_IP: redis
       CARING_REDIS_PORT: "6379"
+      # Nacos 已开启鉴权(nacos.core.auth.enabled=true)，客户端必须带账号
+      NACOS_USERNAME: ${NACOS_USERNAME:-nacos}
+      NACOS_PASSWORD: ${NACOS_PASSWORD:-nacos}
+      # 命名空间/分组：默认值取自 src/main/filters/config-dev.properties
+      # 若 Nacos 里配置实际不在该 namespace，用环境变量 NACOS_NAMESPACE 覆盖即可，无需重新打包
+      NACOS_ID: ${NACOS_NAMESPACE:-c5bec804-e4c4-11f1-a4ec-0242ac150002}
+      NACOS_GROUP: ${NACOS_GROUP:-sass-cloud}
+      NACOS_DISCOVERYGROUP: ${NACOS_DISCOVERYGROUP:-sass-cloud}
       PARAMS: >-
         --caring.nacos.ip=nacos --caring.nacos.port=8848
         --caring.mysql.ip=mysql --caring.mysql.port=3306
@@ -189,6 +209,14 @@ services:
       CARING_MYSQL_PORT: "3306"
       CARING_REDIS_IP: redis
       CARING_REDIS_PORT: "6379"
+      # Nacos 已开启鉴权(nacos.core.auth.enabled=true)，客户端必须带账号
+      NACOS_USERNAME: ${NACOS_USERNAME:-nacos}
+      NACOS_PASSWORD: ${NACOS_PASSWORD:-nacos}
+      # 命名空间/分组：默认值取自 src/main/filters/config-dev.properties
+      # 若 Nacos 里配置实际不在该 namespace，用环境变量 NACOS_NAMESPACE 覆盖即可，无需重新打包
+      NACOS_ID: ${NACOS_NAMESPACE:-c5bec804-e4c4-11f1-a4ec-0242ac150002}
+      NACOS_GROUP: ${NACOS_GROUP:-sass-cloud}
+      NACOS_DISCOVERYGROUP: ${NACOS_DISCOVERYGROUP:-sass-cloud}
       PARAMS: >-
         --caring.nacos.ip=nacos --caring.nacos.port=8848
         --caring.mysql.ip=mysql --caring.mysql.port=3306
@@ -220,6 +248,14 @@ services:
       CARING_MYSQL_PORT: "3306"
       CARING_REDIS_IP: redis
       CARING_REDIS_PORT: "6379"
+      # Nacos 已开启鉴权(nacos.core.auth.enabled=true)，客户端必须带账号
+      NACOS_USERNAME: ${NACOS_USERNAME:-nacos}
+      NACOS_PASSWORD: ${NACOS_PASSWORD:-nacos}
+      # 命名空间/分组：默认值取自 src/main/filters/config-dev.properties
+      # 若 Nacos 里配置实际不在该 namespace，用环境变量 NACOS_NAMESPACE 覆盖即可，无需重新打包
+      NACOS_ID: ${NACOS_NAMESPACE:-c5bec804-e4c4-11f1-a4ec-0242ac150002}
+      NACOS_GROUP: ${NACOS_GROUP:-sass-cloud}
+      NACOS_DISCOVERYGROUP: ${NACOS_DISCOVERYGROUP:-sass-cloud}
       SPRING_APPLICATION_NAME: caring-oauth-server
       PARAMS: >-
         --caring.nacos.ip=nacos --caring.nacos.port=8848

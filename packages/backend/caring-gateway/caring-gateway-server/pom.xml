@@ -69,15 +69,34 @@
             </exclusions>
         </dependency>
 
+        <!--
+            注意：这里不能排除 spring-webmvc。
+            caring-log-starter 的 com.caring.sass.log.interceptor.MdcMvcConfigurer
+            implements WebMvcConfigurer，而该 starter 通过 spring.factories 自动装配
+            LogAutoConfiguration。一旦 spring-webmvc 不在 classpath，Spring 在解析配置类
+            元数据读取 MdcMvcConfigurer 的接口时就会抛
+            FileNotFoundException: class path resource
+            [org/springframework/web/servlet/config/annotation/WebMvcConfigurer.class]，
+            网关启动直接失败。
+            这段 MVC 配置受 caring.webmvc.enabled=true 控制，默认不激活，对 WebFlux 网关无副作用；
+            但启动参数里必须显式加 spring.main.web-application-type=reactive，
+            否则 Boot 检测到 DispatcherServlet 会把应用类型误判成 SERVLET。
+        -->
         <dependency>
             <groupId>com.caring.sass</groupId>
             <artifactId>caring-log-starter</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.springframework</groupId>
-                    <artifactId>spring-webmvc</artifactId>
-                </exclusion>
-            </exclusions>
+        </dependency>
+        <!--
+            caring-log-starter 的 MdcMvcConfigurer implements WebMvcConfigurer，
+            但该 starter 把 spring-webmvc 声明为 provided（不传递），网关这边就必须显式补上，
+            否则解析配置类时会抛 FileNotFoundException(WebMvcConfigurer.class)。
+            该配置受 caring.webmvc.enabled=true 控制，默认不激活，不影响 WebFlux 网关；
+            同时启动参数必须显式指定 spring.main.web-application-type=reactive，
+            因为 starter 会传递 javax.servlet-api，Boot 见到 DispatcherServlet 会误判成 SERVLET 应用。
+        -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
         </dependency>
 
         <dependency>
