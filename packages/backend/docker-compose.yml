@@ -13,7 +13,7 @@ services:
     security_opt:
       - seccomp:unconfined
     volumes:
-      - ./volumes/data/mysqldata:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
       - ./config/mysql/my.cnf:/etc/my.cnf
       # 数据库初始化脚本
       - ./config/sql:/docker-entrypoint-initdb.d
@@ -23,7 +23,7 @@ services:
       - "MYSQL_MULTIPLE_DATABASES=caring_job"
       - "TZ=Asia/Shanghai"
     ports:
-      - "3306:3306"
+      - "3307:3306"
     networks:
       - caring-network
     healthcheck:
@@ -40,6 +40,9 @@ services:
     container_name: caring-nacos
     environment:
       - MODE=standalone
+      - JVM_XMS=512m            # ★ 新增
+      - JVM_XMX=512m            # ★ 新增
+      - JVM_XMN=256m            # ★ 新增
       - SPRING_DATASOURCE_PLATFORM=mysql
       - MYSQL_SERVICE_HOST=mysql
       - MYSQL_SERVICE_PORT=3306
@@ -105,7 +108,136 @@ services:
       - ./config/nginx/html:/usr/share/nginx/html
       - ./volumes/data/nginx-log:/var/log/nginx
     ports:
-      - "80:80"
-      - "443:443"
+      - "8082:10000"
+     # - "443:443"
     networks:
       - caring-network
+
+  caring-gateway-server:
+    image: caring-gateway-server:local
+    platform: linux/amd64
+    build:
+      context: ./caring-gateway/caring-gateway-server
+      args:
+        JAR_FILE: target/caring-gateway-server.jar
+    restart: always
+    environment:
+      NACOS_IP: nacos
+      NACOS_PORT: "8848"
+      CARING_MYSQL_IP: mysql
+      CARING_MYSQL_PORT: "3306"
+      CARING_REDIS_IP: redis
+      CARING_REDIS_PORT: "6379"
+      PARAMS: >-
+        --caring.nacos.ip=nacos --caring.nacos.port=8848
+        --caring.mysql.ip=mysql --caring.mysql.port=3306
+        --caring.redis.ip=redis --caring.redis.port=6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_started
+      redis:
+        condition: service_started
+    ports:
+      - "127.0.0.1:18760:8760"
+    networks:
+      - caring-network
+
+  caring-authority-server:
+    image: caring-authority-server:local
+    platform: linux/amd64
+    build:
+      context: ./caring-authority/caring-authority-server
+      args:
+        JAR_FILE: target/caring-authority-server.jar
+    restart: always
+    environment:
+      NACOS_IP: nacos
+      NACOS_PORT: "8848"
+      CARING_MYSQL_IP: mysql
+      CARING_MYSQL_PORT: "3306"
+      CARING_REDIS_IP: redis
+      CARING_REDIS_PORT: "6379"
+      PARAMS: >-
+        --caring.nacos.ip=nacos --caring.nacos.port=8848
+        --caring.mysql.ip=mysql --caring.mysql.port=3306
+        --caring.redis.ip=redis --caring.redis.port=6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_started
+      redis:
+        condition: service_started
+    networks:
+      - caring-network
+
+  caring-tenant-server:
+    image: caring-tenant-server:local
+    platform: linux/amd64
+    build:
+      context: ./caring-tenant/caring-tenant-server
+      dockerfile: Dockerfile.compose
+      args:
+        JAR_FILE: target/caring-tenant-server.jar
+    restart: always
+    environment:
+      NACOS_IP: nacos
+      NACOS_PORT: "8848"
+      CARING_MYSQL_IP: mysql
+      CARING_MYSQL_PORT: "3306"
+      CARING_REDIS_IP: redis
+      CARING_REDIS_PORT: "6379"
+      PARAMS: >-
+        --caring.nacos.ip=nacos --caring.nacos.port=8848
+        --caring.mysql.ip=mysql --caring.mysql.port=3306
+        --caring.redis.ip=redis --caring.redis.port=6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_started
+      redis:
+        condition: service_started
+      caring-authority-server:
+        condition: service_started
+    networks:
+      - caring-network
+
+  caring-oauth-server:
+    image: caring-oauth-server:local
+    platform: linux/amd64
+    build:
+      context: ./caring-ucenter/caring-ucenter-server
+      args:
+        JAR_FILE: target/caring-ucenter-server.jar
+    restart: always
+    environment:
+      NACOS_IP: nacos
+      NACOS_PORT: "8848"
+      CARING_MYSQL_IP: mysql
+      CARING_MYSQL_PORT: "3306"
+      CARING_REDIS_IP: redis
+      CARING_REDIS_PORT: "6379"
+      SPRING_APPLICATION_NAME: caring-oauth-server
+      PARAMS: >-
+        --caring.nacos.ip=nacos --caring.nacos.port=8848
+        --caring.mysql.ip=mysql --caring.mysql.port=3306
+        --caring.redis.ip=redis --caring.redis.port=6379
+    depends_on:
+      mysql:
+        condition: service_healthy
+      nacos:
+        condition: service_started
+      redis:
+        condition: service_started
+      caring-authority-server:
+        condition: service_started
+      caring-tenant-server:
+        condition: service_started
+    networks:
+      - caring-network
+
+volumes:
+  mysql-data:

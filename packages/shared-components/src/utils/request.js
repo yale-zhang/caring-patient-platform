@@ -3,9 +3,11 @@
  */
 import axios from 'axios'
 
+const env = typeof process !== 'undefined' && process.env ? process.env : {}
+
 // 创建axios实例
 const request = axios.create({
-  baseURL: process.env.VUE_APP_BASE_API || process.env.VITE_AXIOS_BASE_URL,
+  baseURL: env.VUE_APP_BASE_API || env.VITE_AXIOS_BASE_URL,
   timeout: 15000,
   withCredentials: true,
   headers: {

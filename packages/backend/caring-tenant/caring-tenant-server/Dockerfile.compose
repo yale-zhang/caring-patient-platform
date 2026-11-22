@@ -1,0 +1,12 @@
+FROM eclipse-temurin:8-jre
+
+ENV LANG C.UTF-8
+
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone
+
+ARG JAR_FILE=target/caring-tenant-server.jar
+COPY ${JAR_FILE} /app.jar
+
+ENV PARAMS=""
+ENTRYPOINT ["sh","-c","java -Xmx512m -Djava.security.egd=file:/dev/./urandom -jar /app.jar $PARAMS"]

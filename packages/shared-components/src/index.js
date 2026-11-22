@@ -2,26 +2,30 @@
  * 慢病管理平台 - 共享组件库入口文件
  */
 
-// 组件导出
-export { default as MobileHeader } from './components/mobile/MobileHeader'
-export { default as DataTable } from './components/desktop/DataTable'
-export { default as ChartContainer } from './components/charts/ChartContainer'
+import MobileHeader from './components/mobile/MobileHeader.vue'
+import DataTable from './components/desktop/DataTable.vue'
+import ChartContainer from './components/charts/ChartContainer.vue'
+import request from './utils/request'
+import { formatDate, formatPhone } from './utils/format'
+import { getToken, setToken, hasPermission, hasRole, isLoggedIn, logout } from './utils/auth'
+import AuthMixin from './mixins/AuthMixin'
+import TableMixin from './mixins/TableMixin'
+import Permission from './directives/Permission'
+import Loading from './directives/Loading'
+import { dateFilter, phoneFilter } from './filters/index'
 
 // 工具函数导出
-export { default as request } from './utils/request'
-export { formatDate, formatPhone } from './utils/format'
-export { getToken, setToken } from './utils/auth'
+export { MobileHeader, DataTable, ChartContainer }
+export { request, formatDate, formatPhone, getToken, setToken, hasPermission, hasRole, isLoggedIn, logout }
 
 // 混入导出
-export { default as AuthMixin } from './mixins/AuthMixin'
-export { default as TableMixin } from './mixins/TableMixin'
+export { AuthMixin, TableMixin }
 
 // 指令导出
-export { default as Permission } from './directives/Permission'
-export { default as Loading } from './directives/Loading'
+export { Permission, Loading }
 
 // 过滤器导出
-export { dateFilter, phoneFilter } from './filters'
+export { dateFilter, phoneFilter }
 
 // Vue插件安装方法
 const components = [
@@ -30,23 +34,21 @@ const components = [
   ChartContainer
 ]
 
-const install = function(Vue, opts = {}) {
-  // 注册组件
-  components.forEach(component => {
-    Vue.component(component.name, component)
-  })
+const install = function(app) {
+  components.forEach(component => app.component(component.name, component))
+  app.directive('permission', Permission)
+  app.directive('loading', Loading)
 
-  // 注册指令
-  Vue.directive('permission', Permission)
-  Vue.directive('loading', Loading)
+  if (typeof app.filter === 'function') {
+    app.filter('date', dateFilter)
+    app.filter('phone', phoneFilter)
+  }
 
-  // 注册过滤器
-  Vue.filter('date', dateFilter)
-  Vue.filter('phone', phoneFilter)
-
-  // 添加全局方法
-  Vue.prototype.$request = request
-  Vue.prototype.$formatDate = formatDate
+  const globalProperties = app.config && app.config.globalProperties
+    ? app.config.globalProperties
+    : app.prototype
+  globalProperties.$request = request
+  globalProperties.$formatDate = formatDate
 }
 
 // 自动安装
@@ -57,5 +59,7 @@ if (typeof window !== 'undefined' && window.Vue) {
 export default {
   version: '1.0.0',
   install,
-  ...components
+  MobileHeader,
+  DataTable,
+  ChartContainer
 }

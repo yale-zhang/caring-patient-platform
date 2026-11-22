@@ -297,27 +297,24 @@
       window.removeEventListener("message", this.resolveSocialLogin);
     },
     methods: {
-      getsecondName(){
-        const that = this
-        var s = window.location.href;
-        var h = s.split(".")[0];
-        var a = h.split("//")[1];
-        axios.get('http://api-test.caringsaas.cn/api/tenant/tenant/anno/getByDomain?domain=' + a).then(res => {
-          console.log(res)
-          if(res.data.code===0){
-            if(res.data.data){
-              db.save('logo',res.data.data.logo)
-              that.loginForm.tenantView = res.data.data.code
-               window.document.title = res.data.data.name
-            }else{
+      getsecondName() {
+        const apiBase = `${process.env.VUE_APP_PROD_REQUEST_DOMAIN_PREFIX}${process.env.VUE_APP_BASE_API}`;
+        axios.get(`${apiBase}/tenant/tenant/anno/getByDomain`, {
+          params: { domain: window.location.hostname }
+        }).then(res => {
+          if (res.data.code === 0) {
+            if (res.data.data) {
+              db.save('logo', res.data.data.logo);
+              this.loginForm.tenantView = res.data.data.code;
+              window.document.title = res.data.data.name;
+            } else {
               this.$message({
                 message: '项目不存在！',
-                type: "error"
+                type: 'error'
               });
             }
-
           }
-        })
+        });
       },
       getCodeImage() {
         loginApi

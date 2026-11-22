@@ -85,9 +85,9 @@ docker info | grep -A 10 "Registry Mirrors"
 
 - **MySQL 8.0** - 数据库服务
 - **Nacos 1.4.1** - 配置中心和注册中心
-- **Redis 5.0.3** - 缓存服务
-- **XXL-Job 2.2.0** - 分布式任务调度中心
-- **Nginx 1.10** - 反向代理和静态资源服务
+- **Redis 6.2** - 缓存服务
+- **XXL-Job 2.3.0** - 分布式任务调度中心
+- **Nginx 1.21** - 反向代理和静态资源服务
 
 ```bash
 # 启动所有依赖服务
@@ -108,15 +108,17 @@ docker-compose logs -f
   - 默认用户名: `nacos`
   - 默认密码: `nacos`
 
-- **MySQL**: localhost:3306
+- **MySQL**: localhost:3307
   - Root密码: `change-this-password` (请在 .env 中修改)
 
 - **Redis**: localhost:6379
   - 密码: `change-this-password` (请在 .env 中修改)
 
-- **XXL-Job**: http://localhost:9001/xxl-job-admin
+- **XXL-Job**: http://localhost:8080/xxl-job-admin
   - 默认用户名: `admin`
   - 默认密码: `123456`
+- **Nginx**: http://localhost:8082
+- **网关**: http://localhost:8760/api（宿主机 JAR）
 
 ### 3. 导入Nacos配置
 
@@ -189,7 +191,7 @@ vi .env
    ```yaml
    spring:
      datasource:
-       url: jdbc:mysql://127.0.0.1:3306/caring_standalone?...
+       url: jdbc:mysql://127.0.0.1:3307/caring_standalone?...
        username: root
        password: change-this-password  # 修改为实际密码
    ```

@@ -5,11 +5,11 @@
   "author": "jeff",
   "private": true,
   "scripts": {
-    "dev": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
+    "dev": "node --openssl-legacy-provider ../../scripts/run-legacy-vue-dev.js",
     "start": "npm run dev",
     "e2e": "node test/e2e/runner.js",
     "test": "npm run e2e",
-    "build": "node build/build.js"
+    "build": "node --openssl-legacy-provider ../../scripts/build-legacy-vue.js"
   },
   "dependencies": {
     "fastclick": "^1.0.6",

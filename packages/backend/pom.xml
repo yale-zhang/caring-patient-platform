@@ -326,14 +326,18 @@
 
     <repositories>
         <repository>
+            <id>nexus</id>
+            <name>releases</name>
+            <url>https://nexus.caringsaas.cn/repository/maven-releases/</url>
+        </repository>
+        <repository>
+            <id>nexus-snapshots</id>
+            <name>snapshots</name>
+            <url>https://nexus.caringsaas.cn/repository/maven-snapshots/</url>
+        </repository>
+        <repository>
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
-        </repository>
-
-        <repository>
-            <id>nexus</id>
-            <name>snapshots</name>
-            <url>http://nexus.caringsaas.cn/repository/maven-snapshots/</url>
         </repository>
     </repositories>
 

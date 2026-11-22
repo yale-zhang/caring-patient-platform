@@ -32,7 +32,7 @@ export default ({ mode }: ConfigEnv): UserConfigExport => {
 			},
 		},
 		resolve: {
-			extensions: ['.ts', '.js'],
+			extensions: ['.mjs', '.ts', '.js'],
 			alias: {
 				'@': '/src',
 			},

@@ -85,13 +85,14 @@ backend/
 
 ### 启动流程
 
-#### 第一步：启动依赖服务（Docker Compose）
+#### 第一步：构建并启动依赖与核心服务（Docker Compose）
 
-使用 Docker Compose 快速启动所有依赖环境（MySQL、Nacos、Redis、XXL-Job、Nginx）：
+先在后端目录打包 JAR，再使用 Docker Compose 启动依赖环境及网关、权限、租户和 OAuth 核心服务：
 
 ```bash
 cd packages/backend
-docker-compose up -d
+mvn -DskipTests package
+docker compose up -d --build
 ```
 
 此命令会：
@@ -100,20 +101,27 @@ docker-compose up -d
 - 启动 Redis 缓存服务
 - 启动 XXL-Job 分布式调度中心
 - 启动 Nginx 反向代理服务
+- 构建并启动网关、权限、租户和 OAuth（用户中心）服务
 - 自动执行数据库初始化脚本（`config/sql/nacos-init.sql`）
 
 **注意**：
+- 修改后端代码后需重新执行 Maven 打包，再执行 `docker compose up -d --build`
+- Compose 内的服务通过网络访问 MySQL `3306`、Nacos `8848` 和 Redis `6379`；宿主机访问 MySQL 使用映射端口 `3307`
+- 网关容器监听 `8760`，仅映射到宿主机 `127.0.0.1:18760`
+- 若数据库已初始化过，`nacos-init.sql` 不会自动更新已有 Nacos 配置
 - 首次启动需要等待 1-2 分钟，等待所有服务完全启动
-- 可以使用 `docker-compose ps` 查看服务状态
-- 可以使用 `docker-compose logs -f [service-name]` 查看服务日志
+- 可以使用 `docker compose ps` 查看服务状态
+- 可以使用 `docker compose logs -f [service-name]` 查看服务日志
 
 依赖环境启动后，可以访问以下服务：
 
 - **Nacos 控制台**: http://localhost:8848/nacos (用户名/密码: nacos/nacos)
-- **MySQL**: localhost:3306 (用户名: root, 密码: change-this-password)
+- **MySQL**: localhost:3307 (用户名: root, 密码: change-this-password)
 - **Redis**: localhost:6379 (密码: change-this-password)
 - **XXL-Job**: http://localhost:8080/xxl-job-admin (用户名: admin, 密码: 123456)
-- **Nginx**: http://localhost:80
+- **网关**: http://localhost:18760/api
+- **权限服务**: 仅在 Compose 网络内开放
+- **Nginx**: http://localhost:8082
 
 #### 第二步：验证 Nacos 配置初始化
 
@@ -183,42 +191,23 @@ nacos.namespace=85d56e61-f676-11f0-a8b0-328ff568776d
 - 配置文件中的 `nacos.group` 应该为 `sass-cloud`
 
 
-#### 第五步：启动后端服务
+#### 第五步：启动其他后端服务（可选）
 
-**方式一：IDE 启动（推荐用于开发）**
+Docker Compose 已启动网关、权限、租户和 OAuth 核心服务。其他业务服务可通过 IDE 或启动脚本在宿主机运行；如需在 IDE 中调试核心服务，请先停止对应 Compose 服务，避免重复注册或端口冲突。
 
-1. 在 IDE（如 IntelliJ IDEA）中打开项目
-2. 确认 `src/main/filters/config-dev.properties` 中的配置正确
-3. 按顺序启动服务：
-   - **caring-gateway**（网关服务）- 端口 8760
-   - **caring-authority**（权限服务）- 端口 8764
-   - **caring-tenant**（租户服务）
-   - **caring-ucenter**（用户中心）
-   - 其他业务服务（caring-ai、caring-cms、caring-file、caring-msgs、caring-nursing、caring-wx 等）
-
-**方式二：命令行启动**
+使用启动脚本时，会构建并启动 Compose 服务，再在宿主机启动其他业务 JAR：
 
 ```bash
-# 编译项目
-cd packages/backend
-mvn clean package -DskipTests
-
-# 启动各个服务的Server模块（在终端中分别执行）
-java -jar caring-gateway/caring-gateway-server/target/caring-gateway-server.jar
-java -jar caring-authority/caring-authority-server/target/caring-authority-server.jar
-java -jar caring-tenant/caring-tenant-server/target/caring-tenant-server.jar
-java -jar caring-ucenter/caring-ucenter-server/target/caring-ucenter-server.jar
-# ... 其他服务
+./scripts/start-services.sh
 ```
 
-**方式三：使用启动脚本**
+手动以 IDE 或命令行启动宿主机服务时，设置以下环境变量连接 Compose 依赖：`NACOS_IP=127.0.0.1`、`NACOS_PORT=8848`、`CARING_MYSQL_IP=127.0.0.1`、`CARING_MYSQL_PORT=3307`、`CARING_REDIS_IP=127.0.0.1`、`CARING_REDIS_PORT=6379`。
+
+**命令行启动示例**
 
 ```bash
-# 启动所有服务
-./scripts/start-services.sh
-
-# 重启所有服务
-./scripts/restart-services.sh
+# 仅启动未由 Compose 管理的业务服务
+java -jar caring-file/caring-file-server/target/caring-file-server.jar
 ```
 
 #### 第六步：验证服务启动
@@ -232,13 +221,11 @@ java -jar caring-ucenter/caring-ucenter-server/target/caring-ucenter-server.jar
 
 2. **访问网关**
    ```bash
-   curl http://localhost:8760/api/actuator/health
+   curl http://localhost:18760/api/actuator/health
    ```
 
 3. **访问 Swagger 文档**
-   - 网关 Swagger: http://localhost:8760/api/doc.html
-   - 权限服务 Swagger: http://localhost:8764/doc.html
-   - 文件服务 Swagger: http://localhost:8765/doc.html
+   - 网关 Swagger: http://localhost:18760/api/doc.html
 
 
 ## API接口
@@ -249,7 +236,7 @@ java -jar caring-ucenter/caring-ucenter-server/target/caring-ucenter-server.jar
 
 启动服务后，可以通过以下地址访问各服务的 API 文档：
 
-- **网关服务**: http://localhost:8760/api/doc.html
+- **网关服务**: http://localhost:18760/api/doc.html
 - **权限服务**: http://localhost:{端口}/doc.html
 - **文件服务**: http://localhost:{端口}/doc.html
 - **用户中心**: http://localhost:{端口}/doc.html
@@ -689,36 +676,11 @@ public class ExampleServiceTest {
 
 ### 1. 启动后端服务
 
-确保依赖服务（Docker Compose）已启动，然后选择以下任一方式启动后端服务：
-
-**方式一：使用启动脚本（推荐）**
+在 `packages/backend` 目录启动 Compose 中的依赖和核心后端服务：
 ```bash
-# 启动所有后端服务
-./scripts/start-services.sh
-
-# 或重启所有服务
-./scripts/restart-services.sh
+docker compose up -d --build
 ```
-
-**方式二：IDE 启动**
-1. 在 IDE（如 IntelliJ IDEA）中打开项目
-2. 按顺序启动服务：
-   - `caring-gateway-server`（网关服务）- 端口 8760
-   - `caring-authority-server`（权限服务）- 端口 8764
-   - `caring-tenant-server`（租户服务）
-   - `caring-ucenter-server`（用户中心）
-   - 其他业务服务
-
-**方式三：命令行启动**
-```bash
-# 先编译打包
-mvn clean package -DskipTests
-
-# 逐个启动服务
-java -jar caring-gateway/caring-gateway-server/target/caring-gateway-server.jar
-java -jar caring-authority/caring-authority-server/target/caring-authority-server.jar
-# ... 其他服务
-```
+需要启动其他业务服务时，再运行 `./scripts/start-services.sh`。
 
 ### 2. 验证后端服务
 
@@ -731,11 +693,11 @@ java -jar caring-authority/caring-authority-server/target/caring-authority-serve
 
 **访问健康检查**
 ```bash
-curl http://localhost:8760/api/actuator/health
+curl http://localhost:18760/api/actuator/health
 ```
 
 **访问 API 文档**
-- 网关文档：http://localhost:8760/api/doc.html
+- 网关文档：http://localhost:18760/api/doc.html
 - 权限服务文档：http://localhost:8764/doc.html
 
 ### 3. 配置前端API地址
@@ -743,13 +705,13 @@ curl http://localhost:8760/api/actuator/health
 修改前端项目的 API 配置，指向后端网关地址：
 
 ```javascript
-const apiUrl = 'http://localhost:8760/api'
+const apiUrl = 'http://localhost:18760/api'
 ```
 
 **环境变量配置（推荐）**
 ```bash
 # .env.development
-VUE_APP_BASE_API=http://localhost:8760/api
+VUE_APP_BASE_API=http://localhost:18760/api
 ```
 
 ### 4. 启动前端服务
@@ -766,16 +728,16 @@ npm run dev
 **测试接口连通性**
 ```bash
 # 测试网关健康检查
-curl http://localhost:8760/api/actuator/health
+curl http://localhost:18760/api/actuator/health
 
 # 测试权限服务（需要先获取 token）
-curl -X POST http://localhost:8760/api/auth/oauth/token \
+curl -X POST http://localhost:18760/api/auth/oauth/token \
   -H "Content-Type: application/json" \
   -d '{"username":"admin","password":"admin123"}'
 ```
 
 **使用 Swagger 在线调试**
-1. 访问 http://localhost:8760/api/doc.html
+1. 访问 http://localhost:18760/api/doc.html
 2. 在右上角配置认证信息（Bearer Token）
 3. 选择接口进行在线测试
 

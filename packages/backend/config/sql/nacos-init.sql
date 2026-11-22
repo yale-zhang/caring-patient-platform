@@ -246,8 +246,8 @@ VALUES (
 '# 在这里配置 所有的服务 和 所有环境 都相同的配置
 caring:
   nacos:
-    ip: localhost
-    port: 8848
+    ip: ${NACOS_IP:localhost}
+    port: ${NACOS_PORT:8848}
     username: nacos
     password: nacos
   seata:
@@ -439,8 +439,8 @@ VALUES (
 '# mysql 个性化配置， 不同的环境，需要配置不同的链接信息，只需要将这段信息复制到具体环境的配置文件中进行修改即可
 caring:
   mysql:
-    ip: localhost
-    port: 3306
+    ip: ${CARING_MYSQL_IP:localhost}
+    port: ${CARING_MYSQL_PORT:3307}
     driverClassName: com.mysql.cj.jdbc.Driver
     database: caring_base_0000
     username: root
@@ -576,8 +576,8 @@ VALUES (
 # 如：复制到caring-authority-server-dev.yml中将数据库名和ip改掉
 caring:
   redis:
-    ip: localhost
-    port: 6379
+    ip: ${CARING_REDIS_IP:localhost}
+    port: ${CARING_REDIS_PORT:6379}
     password: change-this-password
     database: 0
 

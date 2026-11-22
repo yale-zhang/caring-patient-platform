@@ -32,7 +32,15 @@ module.exports = {
   outputDir: process.env.VUE_APP_PROJECT_NAME,
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
+  parallel: false,
   productionSourceMap: false,
+  css: {
+    loaderOptions: {
+      postcss: {
+        plugins: [require('autoprefixer')()]
+      }
+    }
+  },
   devServer: {
     // port: port,
     open: true,
