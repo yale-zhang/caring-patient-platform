@@ -110,6 +110,8 @@ services:
       - ./config/nginx/conf:/etc/nginx
       - ./config/nginx/html:/usr/share/nginx/html
       - ./volumes/data/nginx-log:/var/log/nginx
+      # 前端静态资源（/caring-ui、/file 的 root 指向容器内 /data/projects）
+      - ./volumes/data/projects:/data/projects
     ports:
       - "8082:10000"
      # - "443:443"
