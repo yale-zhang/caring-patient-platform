@@ -4,6 +4,74 @@ networks:
   caring-network:
     driver: bridge
 
+# ---------------------------------------------------------------------------
+# 业务服务公共模板（YAML 锚点，compose 会忽略 x- 开头的顶层键）
+# ---------------------------------------------------------------------------
+x-caring-service: &caring-service
+  platform: linux/amd64
+  restart: always
+  environment:
+    NACOS_IP: nacos
+    NACOS_PORT: "8848"
+    CARING_MYSQL_IP: mysql
+    CARING_MYSQL_PORT: "3306"
+    CARING_REDIS_IP: redis
+    CARING_REDIS_PORT: "6379"
+    NACOS_USERNAME: ${NACOS_USERNAME:-nacos}
+    NACOS_PASSWORD: ${NACOS_PASSWORD:-nacos}
+    NACOS_ID: ${NACOS_NAMESPACE:-c5bec804-e4c4-11f1-a4ec-0242ac150002}
+    NACOS_GROUP: ${NACOS_GROUP:-sass-cloud}
+    NACOS_DISCOVERYGROUP: ${NACOS_DISCOVERYGROUP:-sass-cloud}
+    PARAMS: >-
+      --caring.nacos.ip=nacos --caring.nacos.port=8848
+      --caring.mysql.ip=mysql --caring.mysql.port=3306
+      --caring.redis.ip=redis --caring.redis.port=6379
+  depends_on:
+    mysql:
+      condition: service_healthy
+    nacos:
+      condition: service_started
+    redis:
+      condition: service_started
+  networks:
+    - caring-network
+
+x-caring-mq-service: &caring-mq-service
+  platform: linux/amd64
+  restart: always
+  environment:
+    NACOS_IP: nacos
+    NACOS_PORT: "8848"
+    CARING_MYSQL_IP: mysql
+    CARING_MYSQL_PORT: "3306"
+    CARING_REDIS_IP: redis
+    CARING_REDIS_PORT: "6379"
+    CARING_RABBITMQ_IP: rabbitmq
+    CARING_RABBITMQ_PORT: "5672"
+    NACOS_USERNAME: ${NACOS_USERNAME:-nacos}
+    NACOS_PASSWORD: ${NACOS_PASSWORD:-nacos}
+    NACOS_ID: ${NACOS_NAMESPACE:-c5bec804-e4c4-11f1-a4ec-0242ac150002}
+    NACOS_GROUP: ${NACOS_GROUP:-sass-cloud}
+    NACOS_DISCOVERYGROUP: ${NACOS_DISCOVERYGROUP:-sass-cloud}
+    PARAMS: >-
+      --caring.nacos.ip=nacos --caring.nacos.port=8848
+      --caring.mysql.ip=mysql --caring.mysql.port=3306
+      --caring.redis.ip=redis --caring.redis.port=6379
+      --caring.rabbitmq.enabled=true
+      --caring.rabbitmq.ip=rabbitmq --caring.rabbitmq.port=5672
+      --caring.rabbitmq.username=caring --caring.rabbitmq.password=caring
+  depends_on:
+    mysql:
+      condition: service_healthy
+    nacos:
+      condition: service_started
+    redis:
+      condition: service_started
+    rabbitmq:
+      condition: service_healthy
+  networks:
+    - caring-network
+
 services:
   mysql:
     image: mysql:8.0.25
@@ -79,6 +147,28 @@ services:
     networks:
       - caring-network
     command: redis-server /usr/local/etc/redis/redis.conf
+
+  rabbitmq:
+    image: rabbitmq:3.9-management
+    platform: linux/amd64
+    container_name: caring-rabbitmq
+    restart: always
+    environment:
+      RABBITMQ_DEFAULT_USER: caring
+      RABBITMQ_DEFAULT_PASS: caring
+      TZ: Asia/Shanghai
+    volumes:
+      - ./volumes/data/rabbitmq:/var/lib/rabbitmq
+    ports:
+      - "15672:15672"
+    networks:
+      - caring-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
 
   # xxl-job 分布式调度中心
   xxl-job:
@@ -276,6 +366,39 @@ services:
         condition: service_started
     networks:
       - caring-network
+
+  caring-nursing-server:
+    <<: *caring-service
+    image: caring-nursing-server:local
+    build:
+      context: ./caring-nursing/caring-nursing-server
+      args:
+        JAR_FILE: target/caring-nursing-server.jar
+
+  caring-cms-server:
+    <<: *caring-service
+    image: caring-cms-server:local
+    build:
+      context: ./caring-cms/caring-cms-server
+      args:
+        JAR_FILE: target/caring-cms-server.jar
+
+  caring-file-server:
+    <<: *caring-service
+    image: caring-file-server:local
+    build:
+      context: ./caring-file/caring-file-server
+      args:
+        JAR_FILE: target/caring-file-server.jar
+
+  caring-msgs-server:
+    <<: *caring-mq-service
+    image: caring-msgs-server:local
+    build:
+      context: ./caring-msgs/caring-msgs-server
+      args:
+        JAR_FILE: target/caring-msgs-server.jar
+
 
 volumes:
   mysql-data:
