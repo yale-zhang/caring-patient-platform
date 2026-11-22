@@ -53,6 +53,17 @@
         <dependency>
             <groupId>com.caring.sass</groupId>
             <artifactId>caring-zipkin-client-starter</artifactId>
+            <exclusions>
+                <!--
+                    网关不需要 MQ；caring-zipkin-client-starter 会把 caring-mq-starter 带进来，
+                    其中 MyRabbitMqConfiguration$RabbitMqConfiguration 实现了 WebMvcConfigurer，
+                    会在 WebFlux 网关里触发 MVC 相关解析与 RabbitMQ 自动装配，这里排除掉。
+                -->
+                <exclusion>
+                    <groupId>com.caring.sass</groupId>
+                    <artifactId>caring-mq-starter</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.caring.sass</groupId>
