@@ -123,7 +123,7 @@ export default {
     let that = this
     let apiUrl = process.env.NODE_ENV === 'development' 
   ? "https://dev-api.example.com" 
-  : "https://api.example.com";
+  : "";
     if (localStorage.getItem("headerTenant")) {
       let mycode = Base64.decode(localStorage.getItem("headerTenant"));
       localStorage.removeItem("pageTitle");

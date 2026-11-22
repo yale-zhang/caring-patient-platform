@@ -2,7 +2,7 @@ import axiosApi from './apiAxios.js'
 
 const apiUrl = process.env.NODE_ENV === 'development' 
   ? 'https://dev-api.example.com' 
-  : 'https://api.example.com'
+  : ''
 const apiList = {
 
   annoJoinGroupFromQrCode: {

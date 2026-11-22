@@ -1,6 +1,10 @@
 // The Vue build version to load with the `import` command
 // (runtime-only or standalone) has been set in webpack.base.conf with an alias.
 import Vue from 'vue'
+
+// 兜底：部分老组件调用 this.$t()，项目未安装 i18n，避免 
+// "TypeError: _vm.$t is not a function" 导致整页渲染失败
+if (!Vue.prototype.$t) { Vue.prototype.$t = function (key) { return key } }
 import App from './App'
 import router from './router'
 import 'default-passive-events'

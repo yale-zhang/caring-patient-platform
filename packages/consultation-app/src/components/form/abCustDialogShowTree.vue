@@ -5,8 +5,13 @@
 <script>
 import Vue from 'vue';
 import '@/assets/ztree/css/zTreeStyle.css';
-import "@/assets/ztree/jquery.min.js";
-import "@/assets/ztree/jquery.ztree.all.min.js";
+import jquery from "@/assets/ztree/jquery.min.js";
+// webpack 下 jquery 的 UMD 只做 module.exports，不会挂到 window 上，
+// 而 jquery.ztree 依赖全局 jQuery/$，这里手动补齐，否则报 "jQuery is not defined"
+if (typeof window !== "undefined" && !window.jQuery) {
+  window.jQuery = window.$ = jquery;
+}
+require("@/assets/ztree/jquery.ztree.all.min.js");
 
 export default {
 	props:["dialog"],//dialog:树对话框

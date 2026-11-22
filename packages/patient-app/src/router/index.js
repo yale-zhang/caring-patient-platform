@@ -487,7 +487,7 @@ const router = new Router({
 
 let apiUrl = process.env.NODE_ENV === 'development' 
   ? "https://dev-api.example.com" 
-  : "https://api.example.com"
+  : ""
 // 首次加载判断是否患者需要完成入组
 let shouldCheckEnterGroupStatus = true
 // 记录患者的入组状态
