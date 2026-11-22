@@ -32,6 +32,7 @@
         if (typeof websdk === 'undefined') {
           window.websdk = { default: { connection: makeConn, message: function () { return { set: noop, body: {} } } } }
         }
+        if (typeof webrtc === 'undefined') { window.webrtc = {} }
         if (typeof emedia === 'undefined') { window.emedia = {} }
         if (typeof window.EMedia === 'undefined') { window.EMedia = {} }
       })()

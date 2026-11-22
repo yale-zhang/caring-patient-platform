@@ -1,4 +1,4 @@
-FROM openjdk:8-jre
+FROM eclipse-temurin:8-jre
 MAINTAINER leizhi zhi.lei@caringnurse.cn
 
 # 设置环境变量
@@ -32,4 +32,4 @@ COPY ${JAR_FILE} /app.jar
 # 设置启动命令
 ENV FFMPEG_PATH="/usr/bin/ffmpeg"
 ENV PARAMS=""
-ENTRYPOINT ["sh","-c","java -jar -Xmx512m -Djava.security.egd=file:/dev/./urandom -jar /app.jar $PARAMS"]
+ENTRYPOINT ["sh","-c","java -Xmx512m -Djava.security.egd=file:/dev/./urandom -jar /app.jar $PARAMS"]

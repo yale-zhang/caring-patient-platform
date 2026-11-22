@@ -25,4 +25,4 @@ ARG JAR_FILE=target/*.jar
 COPY ${JAR_FILE} /app.jar
 
 ENV PARAMS=""
-ENTRYPOINT ["sh","-c","java -jar -Xmx512m -Djava.security.egd=file:/dev/./urandom -jar /app.jar $PARAMS"]
+ENTRYPOINT ["sh","-c","java -Xmx512m -Djava.security.egd=file:/dev/./urandom -jar /app.jar $PARAMS"]

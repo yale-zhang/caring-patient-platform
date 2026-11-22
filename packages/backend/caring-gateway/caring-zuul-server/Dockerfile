@@ -1,4 +1,4 @@
-FROM openjdk:8-jre
+FROM eclipse-temurin:8-jre
 MAINTAINER caring 244387066@qq.com
 RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
     && echo "Asia/Shanghai" > /etc/timezone
