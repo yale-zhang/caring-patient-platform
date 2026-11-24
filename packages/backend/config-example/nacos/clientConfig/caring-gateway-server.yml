@@ -19,9 +19,32 @@ spring:
           lowerCaseServiceId: true
       routes:
         - id: oauth
-          uri: lb://caring-oauth-server
+          # 注意：oauth 服务由 caring-ucenter/caring-ucenter-server 构建，
+          # 其 spring.application.name 取自 artifactId = caring-ucenter-server，
+          # 而非 caring-oauth-server，故此处必须指向实际注册名。
+          # 注意：同一路由内多个 Path 谓词之间是 AND 关系，
+          # 因此 /oauth/** 与 /ucenter/** 必须拆成两条独立路由。
+          uri: lb://caring-ucenter-server
           predicates:
             - Path=/oauth/**
+          filters:
+            - StripPrefix=1
+        - id: ucenter
+          uri: lb://caring-ucenter-server
+          predicates:
+            - Path=/ucenter/**
+          filters:
+            - StripPrefix=1
+        - id: nursing
+          uri: lb://caring-nursing-server
+          predicates:
+            - Path=/nursing/**
+          filters:
+            - StripPrefix=1
+        - id: cms
+          uri: lb://caring-cms-server
+          predicates:
+            - Path=/cms/**
           filters:
             - StripPrefix=1
         - id: tenant

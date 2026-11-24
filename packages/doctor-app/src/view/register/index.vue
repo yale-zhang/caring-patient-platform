@@ -438,9 +438,8 @@ export default {
     // 注册医生
     registerDoctor() {
       var s = window.location.href;
-      var h = s.split(".")[0];
-      // 获取域名
-      var a = h.split("//")[1];
+      // 获取域名（用完整主机名，IP 访问也能解析）
+      var a = location.hostname;
       let domain = location.hostname
       if (domain === 'localhost') {
         a = 'grfwh';

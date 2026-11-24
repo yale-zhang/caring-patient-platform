@@ -29,7 +29,12 @@ import java.util.Objects;
 
 public class ScreenshotTaskServiceImpl extends SuperServiceImpl<ScreenshotTaskMapper, ScreenshotTask> implements ScreenshotTaskService {
 
-    @Autowired
+    /**
+     * 华为云 MPC 客户端，仅在 caring.file.type=HW 时才会被创建。
+     * 非 HW 模式（如 LOCAL）下该 bean 不存在，故此处声明为非必需依赖，
+     * 避免服务因缺少该 bean 而无法启动。调用方 createScreenshotTask 仅在 HW 模式下使用。
+     */
+    @Autowired(required = false)
     CaringMpcClient caringMpcClient;
 
 
@@ -46,6 +51,13 @@ public class ScreenshotTaskServiceImpl extends SuperServiceImpl<ScreenshotTaskMa
         String bucket = screenshotTaskSaveDTO.getBucket();
         String fileName = screenshotTaskSaveDTO.getFileName();
         ScreenshotTask screenshotTask = new ScreenshotTask().setFileName(fileName);
+        if (caringMpcClient == null) {
+            log.warn("caring.file.type 未配置为 HW，MPC 客户端不可用，无法创建视频截图任务。fileName={}", fileName);
+            screenshotTask.setStatus("Mpc Client Unavailable");
+            screenshotTask.setDescription("华为云 MPC 客户端未启用（caring.file.type != HW）");
+            baseMapper.insert(screenshotTask);
+            return screenshotTask;
+        }
         CreateThumbnailsTaskResponse taskResponse = caringMpcClient.createScreenshotTask(bucket, object);
         if (Objects.isNull(taskResponse)) {
             screenshotTask.setStatus("Return Null");

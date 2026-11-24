@@ -5,7 +5,7 @@ const apiList = {
 
   screenshotPhoto:{
     method: 'GET',
-    url: apiUrl + `/file/screenshotTask/anno/getScreenshotPhoto?fileName=`
+    url: apiUrl + `/api/file/screenshotTask/anno/getScreenshotPhoto?fileName=`
   }
 
 }
@@ -30,7 +30,7 @@ export function getScreenshotPhoto(filename) {
 export const createScreenshotTaskAndReturnCover = (data) => {
   return axiosApi({
     method: 'POST',
-    url: apiUrl + `/file/screenshotTask/createScreenshotTaskAndReturnCover`,
+    url: apiUrl + `/api/file/screenshotTask/createScreenshotTaskAndReturnCover`,
     data
   })
 }
@@ -42,6 +42,6 @@ export const createScreenshotTaskAndReturnCover = (data) => {
 export const getHuaweiObsPath = () => {
   return axiosApi({
     method: 'GET',
-    url: apiUrl + `/file/screenshotTask/getHuaweiObsPath`,
+    url: apiUrl + `/api/file/screenshotTask/getHuaweiObsPath`,
   })
 }

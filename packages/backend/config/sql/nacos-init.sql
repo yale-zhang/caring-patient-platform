@@ -227,8 +227,12 @@ INSERT INTO roles (username, role) VALUES ('nacos', 'ROLE_ADMIN');
 
 -- Nacos 配置初始化
 -- 先创建 dev 命名空间(如果不存在),然后获取其 UUID
+-- 固定 UUID，与 src/main/filters/config-dev.properties 的 nacos.namespace 保持一致。
+-- 原因: 若使用 UUID() 随机生成，每次初始化出的命名空间都不同，
+--      会与 config-dev.properties 中硬编码的 namespace 不匹配，
+--      导致所有微服务启动后读不到任何 Nacos 配置（common.yml / mysql.yml 等）。
 INSERT IGNORE INTO tenant_info (kp, tenant_id, tenant_name, tenant_desc, create_source, gmt_create, gmt_modified)
-VALUES ('1', UUID(), 'dev', '开发环境命名空间', 'sql', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
+VALUES ('1', 'c5bec804-e4c4-11f1-a4ec-0242ac150002', 'dev', '开发环境命名空间', 'sql', UNIX_TIMESTAMP() * 1000, UNIX_TIMESTAMP() * 1000);
 
 -- 获取 dev 命名空间的实际 UUID
 SELECT @namespace_id := tenant_id 
@@ -245,6 +249,16 @@ VALUES (
     @group_id,
 '# 在这里配置 所有的服务 和 所有环境 都相同的配置
 caring:
+  application:
+    # 手机号等敏感字段的 AES 加密密钥（EncryptionUtil 使用）。
+    # 缺失会导致 ApplicationProperties.getEncryptionKey() 为 null，
+    # 患者/医生按手机号查询时抛异常，登录接口返回"无效参数异常"。
+    encryption-key: sva4yAdvVa6I6Eyo
+    # OpenAI token 列表；未配置时 OpenAiConfiguration 会降级为占位 token，
+    # 保证 msgs 服务可启动（AI 功能不可用）。
+    open-ai-token:
+      - unconfigured-openai-token
+    open-ai-host: http://openai.caringsaas.cn/v1
   nacos:
     ip: ${NACOS_IP:localhost}
     port: ${NACOS_PORT:8848}
@@ -602,7 +616,7 @@ j2cache:
   L1:
     provider_class: caffeine
   L2:
-    provider_class: net.oschina.j2cache.cache.support.redis.SpringRedisProvider
+    provider_class: lettuce
     config_section: lettuce
   sync_ttl_to_redis: true
   default_cache_null_object: false

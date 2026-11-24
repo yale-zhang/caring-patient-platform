@@ -175,18 +175,37 @@ public class LoginDecryption {
 
     /**
      * 解密前端登录提交的 账号 密码
-     * @param str
-     * @return
+     *
+     * <p>前端部分版本直接提交明文手机号，此时三层 Base64 解密会失败
+     * （Illegal base64 character / Last unit does not have enough valid bits）。
+     * 为兼容明文提交，此处在解密失败时回退为原值，
+     * 由调用方后续的 isValidAccount 做账号合法性校验。
+     *
+     * @param str 前端提交的账号
+     * @return 解密后的账号；无法解密时原样返回
      */
     public static String loginDecryption(String str) {
+        if (str == null || str.isEmpty()) {
+            return str;
+        }
+        try {
+            byte[] decode = Base64.getDecoder().decode(str);
+            String decodedString = new String(decode);
+            if (decodedString.length() < 2) {
+                return str;
+            }
+            String substring = decodedString.substring(1, decodedString.length() - 1);
+            byte[] decode1 = Base64.getDecoder().decode(substring);
 
-        byte[] decode = Base64.getDecoder().decode(str);
-        String decodedString = new String(decode);
-        String substring = decodedString.substring(1, decodedString.length() - 1);
-        byte[] decode1 = Base64.getDecoder().decode(substring);
-
-        String decoded1String = new String(decode1);
-        return decoded1String.substring(7);
+            String decoded1String = new String(decode1);
+            if (decoded1String.length() < 7) {
+                return str;
+            }
+            return decoded1String.substring(7);
+        } catch (IllegalArgumentException | IndexOutOfBoundsException e) {
+            // 非加密格式（如明文手机号），按原值处理
+            return str;
+        }
     }
 
 

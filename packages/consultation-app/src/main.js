@@ -106,6 +106,39 @@ Vue.prototype.$on = function (event, func) {
   on.call(this, event, newFunc)
 }
 
+// vue-i18n 的 $i18n 是 getter，返回 this._i18n；给没有 i18n 的实例兜底一个空实现，
+// 这样 vue-i18n 自己的 $t 也不会因为 this._i18n 为空而崩
+Vue.mixin({
+  beforeCreate: function () {
+    if (!this._i18n) {
+      this._i18n = {
+        locale: 'zh',
+        _t: function (key) { return key },
+        _tc: function (key) { return key },
+        _te: function () { return false },
+        _getMessages: function () { return {} }
+      }
+    }
+  }
+})
+
+// vue-i18n 的 $t 依赖 this._i18n，某些组件在 i18n 初始化前渲染会抛 "reading '_t'"；
+// 这里在创建根实例前再包一层（Vue.use(VueI18n) 会覆盖 prototype，必须放在它之后）
+if (typeof Vue.prototype.$t === 'function') {
+  var __raw$t = Vue.prototype.$t
+  Vue.prototype.$t = function () {
+    if (!this || !this.$i18n || typeof this.$i18n._t !== 'function') return arguments[0]
+    return __raw$t.apply(this, arguments)
+  }
+  if (typeof Vue.prototype.$tc === 'function') {
+    var __raw$tc = Vue.prototype.$tc
+    Vue.prototype.$tc = function () {
+      if (!this || !this.$i18n || typeof this.$i18n._t !== 'function') return arguments[0]
+      return __raw$tc.apply(this, arguments)
+    }
+  }
+}
+
 window.Vue = new Vue({
   router,
   store,

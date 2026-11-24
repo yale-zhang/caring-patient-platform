@@ -552,8 +552,7 @@ function wxAuthorize(onComplete) {
   }
 
   var s = window.location.href;
-  var h = s.split(".")[0];
-  var a = h.split("//")[1];
+  var a = location.hostname;   // 用完整主机名，IP 访问也能正确解析租户
   let domain = location.hostname
   if (domain === 'localhost') {
     a = 'kailing';
@@ -581,8 +580,7 @@ function tempInitDict(tenantCode) {
 //初始化的函数  获取到headerTenant和wxAppId
 function initPage(callback) {
   let s = window.location.href;
-  let h = s.split(".")[0];
-  let a = h.split("//")[1];
+  let a = location.hostname;   // 用完整主机名，IP 访问也能正确解析租户
   let domain = location.hostname
   if (domain === 'localhost') {
     a = 'kailing';

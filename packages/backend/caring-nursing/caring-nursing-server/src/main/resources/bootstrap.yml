@@ -4,10 +4,10 @@ caring:
     ip: ${NACOS_IP:@nacos.ip@}
     port: ${NACOS_PORT:@nacos.port@}
     namespace: ${NACOS_ID:@nacos.namespace@}
-    group: ${NACOS_ID:@nacos.group@}
+    group: ${NACOS_GROUP:@nacos.group@}
     discoverygroup: ${NACOS_DISCOVERYGROUP:@nacos.discoverygroup@}
-    username: ${NACOS_ID:@nacos.username@}
-    password: ${NACOS_ID:@nacos.password@}
+    username: ${NACOS_USERNAME:@nacos.username@}
+    password: ${NACOS_PASSWORD:@nacos.password@}
   kafka:
     enabled: true
 

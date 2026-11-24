@@ -89,8 +89,7 @@ export default {
   mounted() {
     if (this.$route.query && this.$route.query.doctorId) {
       var s = window.location.href;
-      var h = s.split(".")[0];
-      var a = h.split("//")[1];
+      var a = location.hostname;
       contentApi.getByDomain(a)
         .then(res => {
           if (res.data.code === 0) {

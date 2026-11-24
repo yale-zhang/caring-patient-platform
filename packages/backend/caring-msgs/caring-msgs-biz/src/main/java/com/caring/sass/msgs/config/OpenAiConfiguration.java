@@ -13,6 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import java.time.Duration;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -30,7 +32,15 @@ public class OpenAiConfiguration {
 
     @Bean
     public CaringOpenAiService openAiService() {
-        String token = ApplicationProperties.getOpenAiToken().get(0);
+        List<String> tokens = ApplicationProperties.getOpenAiToken();
+        if (tokens == null || tokens.isEmpty()) {
+            // 未配置 OpenAI token（如本地/演示环境）时降级为占位 token，
+            // 避免因 get(0) 抛 NPE 导致整个 msgs 服务无法启动。
+            // 实际调用 AI 接口时会因 token 无效而失败，但不影响其它业务功能。
+            log.warn("未配置 caring.application.open-ai-token，OpenAI 服务将使用占位 token，AI 相关功能不可用");
+            return new CaringOpenAiService("unconfigured-openai-token", Duration.ofSeconds((120)));
+        }
+        String token = tokens.get(0);
         return new CaringOpenAiService(token, Duration.ofSeconds((120)));
     }
 
@@ -51,7 +61,7 @@ public class OpenAiConfiguration {
         return OpenAiStreamClient
                 .builder()
                 .apiHost(ApplicationProperties.getOpenAiHost())
-                .apiKey(ApplicationProperties.getOpenAiToken())
+                .apiKey(openAiKeys())
                 //自定义key使用策略 默认随机策略
                 .keyStrategy(new KeyRandomStrategy())
                 .okHttpClient(okHttpClient)
@@ -75,11 +85,23 @@ public class OpenAiConfiguration {
         return OpenAiClient
                 .builder()
                 .apiHost(ApplicationProperties.getOpenAiHost())
-                .apiKey(ApplicationProperties.getOpenAiToken())
+                .apiKey(openAiKeys())
                 //自定义key使用策略 默认随机策略
                 .keyStrategy(new KeyRandomStrategy())
                 .okHttpClient(okHttpClient)
                 .build();
+    }
+
+    /**
+     * 获取 OpenAI api key 列表；未配置时返回占位值，避免 NPE 导致服务无法启动。
+     */
+    private List<String> openAiKeys() {
+        List<String> tokens = ApplicationProperties.getOpenAiToken();
+        if (tokens == null || tokens.isEmpty()) {
+            log.warn("未配置 caring.application.open-ai-token，OpenAI 客户端将使用占位 token，AI 相关功能不可用");
+            return Collections.singletonList("unconfigured-openai-token");
+        }
+        return tokens;
     }
 
 }

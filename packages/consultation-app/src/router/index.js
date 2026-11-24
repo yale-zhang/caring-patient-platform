@@ -47,8 +47,7 @@ router.beforeEach((to, from, next) => {
 //初始化的函数  获取到headerTenant和wxAppId
   function initPage(callback) {
     var s = window.location.href;
-    var h = s.split(".")[0];
-    var a = h.split("//")[1];
+    var a = location.hostname;
     axios.get(`${process.env.NODE_ENV === 'development' ? 'https://dev-api.example.com' : ''}/api/tenant/tenant/anno/getByDomain?domain=`+ a).then(res => {
       if (res.data.code === 0) {
         if (res.data.data) {

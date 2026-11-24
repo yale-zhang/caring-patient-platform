@@ -329,8 +329,7 @@
         //未授权过患者进行授权
         function wxAuthorize() {
           var s = window.location.href;
-          var h = s.split(".")[0];
-          var a = h.split("//")[1];
+          var a = location.hostname;
           window.location.href = Api.getApiUrl() + '/api/wx/wxUserAuth/anno/getWxUserCode?domain=' + a + '&redirectUri='+ s + '&groupId=' + localStorage.getItem('groupId')
         }
         //获取跳转回来的连接参数

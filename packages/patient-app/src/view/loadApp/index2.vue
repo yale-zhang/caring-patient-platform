@@ -106,8 +106,7 @@ export default {
     },
     getInfo() {
       var s = window.location.href;
-      var h = s.split(".")[0];
-      var a = h.split("//")[1];
+      var a = location.hostname;
       axios.get(`${process.env.NODE_ENV === 'development' ? 'https://dev-api.example.com' : ''}/api/tenant/tenant/anno/getGuideByDomain?domain=` + a).then(res => {
         console.log(res.data)
         if (res.data.code === 0) {

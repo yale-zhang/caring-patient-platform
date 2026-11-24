@@ -537,7 +537,7 @@ function ruleSelectFilter(userId, token, wxAppId, headerTenant,  to, from, next)
 function checkOpenIdUserRole(to, next) {
   const query = to.query
   if (query && query.openId) {
-    axios.get(apiUrl + '/wx/config/anno/getWeiXinUserInfo' + '?openId=' + query.openId).then(res => {
+    axios.get(apiUrl + '/api/wx/config/anno/getWeiXinUserInfo' + '?openId=' + query.openId).then(res => {
       if (res.data.code === 0) {
         const result = res.data.data
         if (result.userRole === 'patient') {
@@ -588,13 +588,12 @@ function wxAuthorize(to, next) {
     return
   }
   var s = window.location.href;
-  var h = s.split(".")[0];
-  var a = h.split("//")[1];
+  var a = location.hostname;
   let domain = location.hostname
   if (domain === 'localhost') {
     a = 'kailing';
   }
-  window.location.href = apiUrl + '/wx/wxUserAuth/anno/getWxUserCode?domain=' + a + '&redirectUri=' + encodeURIComponent(s)
+  window.location.href = apiUrl + '/api/wx/wxUserAuth/anno/getWxUserCode?domain=' + a + '&redirectUri=' + encodeURIComponent(s)
 }
 
 /**
@@ -602,7 +601,7 @@ function wxAuthorize(to, next) {
  * @param tenantCode
  */
 function tempInitDict(tenantCode) {
-  axios.get(apiUrl + '/authority/dictionaryItem/anno/queryTenantDict' + '?tenantCode=' + tenantCode).then(res => {
+  axios.get(apiUrl + '/api/authority/dictionaryItem/anno/queryTenantDict' + '?tenantCode=' + tenantCode).then(res => {
     if (res.data.code === 0) {
       const dict = res.data.data
       if (dict && dict.length > 0) {
@@ -618,8 +617,7 @@ function tempInitDict(tenantCode) {
  */
 function initPage(callback) {
   const s = window.location.href;
-  const h = s.split(".")[0];
-  let a = h.split("//")[1];
+  let a = location.hostname;
   // 测试环境时，localhost替换域名为kailing 去获取项目信息
   let domain = location.hostname
   if (domain === 'localhost') {
@@ -630,7 +628,7 @@ function initPage(callback) {
     window.document.title = JSON.parse(localStorage.getItem('projectInfo')).name
     callback()
   } else {
-    axios.get(apiUrl + '/tenant/tenant/v2/anno/patient/getByDomain?domain=' + a).then(res => {
+    axios.get(apiUrl + '/api/tenant/tenant/v2/anno/patient/getByDomain?domain=' + a).then(res => {
       if (res.data.code === 0) {
         console.log('router数据', res.data.data)
         localStorage.setItem('headerTenant', Base64.encode(res.data.data.code))
@@ -708,7 +706,7 @@ function isGroup(userId, toPath, next) {
     patientCompleteEnterGroupSuccess(toPath, next)
     return
   }
-  axios.get(apiUrl + '/ucenter/patient/' +userId, {
+  axios.get(apiUrl + '/api/ucenter/patient/' +userId, {
     params: {},
     headers: {
       Authorization: 'Basic Y2FyaW5nX3VpOmNhcmluZ191aV9zZWNyZXQ=',

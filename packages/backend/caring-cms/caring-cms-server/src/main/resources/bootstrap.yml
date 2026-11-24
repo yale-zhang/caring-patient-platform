@@ -6,8 +6,8 @@ caring:
     namespace: ${NACOS_ID:@nacos.namespace@}
     group: ${NACOS_GROUP:@nacos.group@}
     discoverygroup: ${NACOS_DISCOVERYGROUP:@nacos.discoverygroup@}
-    username: ${NACOS_ID:@nacos.username@}
-    password: ${NACOS_ID:@nacos.password@}
+    username: ${NACOS_USERNAME:@nacos.username@}
+    password: ${NACOS_PASSWORD:@nacos.password@}
 
 spring:
   main:

@@ -9,7 +9,7 @@ const apiList = {
 
   getContent: {
     method: 'GET',
-    url: apiUrl + `/ucenter/doctor/`
+    url: apiUrl + `/api/ucenter/doctor/`
   },
   getContentCode: {
     method: 'GET',
@@ -18,58 +18,58 @@ const apiList = {
   //修改医生的基本信息
   putContent: {
     method: 'PUT',
-    url: apiUrl + `/ucenter/doctor`
+    url: apiUrl + `/api/ucenter/doctor`
   },
   //获取患者的分类列表
   getstatisticPatientByDoctorId: {
     method: 'GET',
-    url: apiUrl + `/ucenter/statistics/statisticPatientByDoctorId/`
+    url: apiUrl + `/api/ucenter/statistics/statisticPatientByDoctorId/`
   },
   //获取患者分类后的列表
   postquery: {
     method: 'POST',
-    url: apiUrl + `/ucenter/patient/query`
+    url: apiUrl + `/api/ucenter/patient/query`
   },
   //获取患者信息
   getContentPatient: {
     method: 'GET',
-    url: apiUrl + `/ucenter/patient/`
+    url: apiUrl + `/api/ucenter/patient/`
   },
   //获取健康表单
   gethealthform: {
     method: 'GET',
-    url: apiUrl + `/nursing/formResult/getFromResultByCategory/`
+    url: apiUrl + `/api/nursing/formResult/getFromResultByCategory/`
   },
   //医生登录获取验证码
   sendcheckNumber: {
     method: 'POST',
-    url: apiUrl + `/ucenter/anno/doctor/send`
+    url: apiUrl + `/api/ucenter/anno/doctor/send`
   },
   //医生登录
   sendlogin: {
     method: 'POST',
-    url: apiUrl + `/ucenter/anno/doctor/login`
+    url: apiUrl + `/api/ucenter/anno/doctor/login`
   },
 //数据统计
   statisticDashboard: {
     method: 'GET',
-    url: apiUrl + `/ucenter/statistics/statisticDashboard/`
+    url: apiUrl + `/api/ucenter/statistics/statisticDashboard/`
   },
   //医生未读消息
   getCountDoctorMessage: {
     method: 'GET',
-    url: apiUrl + `/msgs/im/countDoctorMsgNumber/`
+    url: apiUrl + `/api/msgs/im/countDoctorMsgNumber/`
   },
 
   //注册引导表单一
   regGuidegetGuide: {
     method: 'GET',
-    url: apiUrl + `/wx/regGuide/getGuide`
+    url: apiUrl + `/api/wx/regGuide/getGuide`
   },
   //注册引导表单一
   geth5router: {
     method: 'GET',
-    url: apiUrl + `/tenant/h5Router/anno/query/`
+    url: apiUrl + `/api/tenant/h5Router/anno/query/`
   },
 
 }

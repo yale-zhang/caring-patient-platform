@@ -69,11 +69,10 @@ function wxAuthorize() {
   }
 
   const s = window.location.href;
-  const h = s.split(".")[0];
-  const a = h.split("//")[1];
+  let a = location.hostname;
   localStorage.removeItem('userId')
   localStorage.removeItem('token')
-  window.location.href = apiUrl + '/wx/wxUserAuth/anno/getWxUserCode?domain=' + a + '&redirectUri=' + encodeURIComponent(s)
+  window.location.href = apiUrl + '/api/wx/wxUserAuth/anno/getWxUserCode?domain=' + a + '&redirectUri=' + encodeURIComponent(s)
 }
 
 function handleSuccess(res, resolve) {

@@ -5,7 +5,7 @@ const apiList = {
 
   screenshotPhoto:{
     method: 'GET',
-    url: apiUrl + `/file/screenshotTask/anno/getScreenshotPhoto?fileName=`
+    url: apiUrl + `/api/file/screenshotTask/anno/getScreenshotPhoto?fileName=`
   }
 
 }
